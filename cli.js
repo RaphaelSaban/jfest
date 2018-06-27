@@ -1,19 +1,17 @@
 #!/usr/bin/env node
 
 const dir = process.cwd(), // System under test
-      path = process.argv[1].split('/').slice(0,-1).join('/'),
       
-      validateFile = require(path + '/validate_file'),
+      validateFile = require(__dirname + '/validate_file'),
 
       fs = require('fs'),
-      log = require('./log'),
+      log = require(__dirname + '/log'),
 
       lockedFiles = {};
 
-require('./validate/calls').warmup();
+require(__dirname + '/validate/calls').warmup();
 
 validateDir(dir);
-
 
 function validateDir (dir) {
     log.out("-- watching", dir);
