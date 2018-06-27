@@ -1,6 +1,6 @@
 {
     "name": "jfest",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Automated command-line unit tests for stateless functions",
     "main": "cli.js",
     "scripts": {
