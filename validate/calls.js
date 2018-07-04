@@ -103,7 +103,7 @@ function warmup () {
             if (data) {
 	        calls = myParse(data.toString());
             }
-            console.log("--Cache loaded ("+Object.keys(calls).length+" function calls)");
+            console.log("-- cache loaded ("+Object.keys(calls).length+" function calls)");
         }
     );
 };

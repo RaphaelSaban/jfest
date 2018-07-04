@@ -102,6 +102,7 @@ function validateFunctions (js_functions) {
     //     .forEach( ({name}) => delete $futs[name]);
 
     $results.regression.log();
+    log.hLineDashed();
     $results.change.log();
     
 };

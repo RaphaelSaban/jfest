@@ -1,7 +1,7 @@
 {
     "name": "jfest",
-    "version": "1.0.1",
-    "description": "Automated command-line unit tests for stateless functions",
+    "version": "1.0.2",
+    "description": "Automated command-line unit tests for javascript",
     "main": "cli.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
