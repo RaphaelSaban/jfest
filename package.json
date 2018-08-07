@@ -1,5 +1,5 @@
 {
-    "name": "jfest",
+    "name": "jinstatest",
     "version": "1.0.2",
     "description": "Automated command-line unit tests for javascript",
     "main": "cli.js",
@@ -8,7 +8,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "RaphaelSaban/jfest"
+        "url": "RaphaelSaban/jinstatest"
     },
     "keywords": [
         "unit",
@@ -19,7 +19,7 @@
     "author": "Raphaël Saban",
     "license": "MIT",
     "bin": {
-        "jfest": "./cli.js"
+        "jinstatest": "./cli.js"
     },
     "dependencies": {
         "cli-color": "^1.2.0",

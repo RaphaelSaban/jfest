@@ -1,28 +1,26 @@
-const { myStringify, myParse } = require('./utils');
+const { myStringify, myParse } = require('./utils'),
+      { deepAssign } = require('./deepassign');
 
 // Cache
 var calls = {};
 
-function fetch (
-    f_name,
-    _this,
-    args)
+function fetch (callee)
 {
 
-    let this_key = myStringify(_this),
+    let {name, _this, args} = callee,
+        this_key = myStringify(_this),
         args_key = myStringify(args);
     
-    if (f_name in calls &&
-        this_key in calls[f_name] &&
-        args_key in calls[f_name][this_key])
+    if (name in calls &&
+        this_key in calls[name] &&
+        args_key in calls[name][this_key])
     {
-        let {value, utime} = calls[f_name][this_key][args_key];
+        let call = calls[name][this_key][args_key];
         
-        return {
-            hit: true,
-            value,
-            utime
-        };
+        return deepAssign(
+            {hit: true},
+            call
+        );
     }
     return {
         hit: false
@@ -30,61 +28,59 @@ function fetch (
 }
 
 function write (
-    f_name,
-    _this,
-    args,
+    callee,
     call)
 {
-    let this_key = myStringify(_this),
+    let {name, _this, args} = callee,
+        this_key = myStringify(_this),
         args_key = myStringify(args);
     
-    if (! (f_name in calls))
-	calls[f_name] = {};
-    if (! (this_key in calls[f_name]))
-	calls[f_name][this_key] = {};
+    if (! (name in calls))
+	calls[name] = {};
+    if (! (this_key in calls[name]))
+	calls[name][this_key] = {};
 
-    calls[f_name][this_key][args_key] = call;
+    calls[name][this_key][args_key] = deepAssign(
+        {name, args},
+        call
+    );
 }
 
-function getFunctionCalls (f_name) {
-    if (! (f_name in calls) )
+function getFunctionCalls (name) {
+    if (! (name in calls) )
         return [];
 
     let res = [];
-    for (let this_key in calls[f_name])
-        for (let args_key in calls[f_name][this_key])
-            res.push(calls[f_name][this_key][args_key]);
+    for (let this_key in calls[name])
+        for (let args_key in calls[name][this_key])
+            res.push( deepAssign( {}, calls[name][this_key][args_key] ) );
 
     return res;
 }
 
-function compare(
-    f_name,
-    _this,
-    args,
+function compare (
+    callee,
     call)
 {
-    let this_key = myStringify(_this),
-        args_key = myStringify(args),
+    let this_key = myStringify(callee._this),
+        args_key = myStringify(callee.args),
+        new_this = myStringify(call._this),
         new_value = myStringify(call.value),
 
-        message = f_name + "[" + this_key + "](" + args_key.slice(1, -1) + ")" + " [new] " + new_value,
+        message = callee.name + "[" + this_key + "](" + args_key.slice(1, -1) + ")" + "\n[new] " + "[" + new_this + "] " + new_value,
         diff = false,
 
-        {hit, value, utime} = fetch(
-            f_name,
-            _this,
-            args
-        );
+        cache = fetch(callee);
 
-    if (hit) {
-        let cached_value = myStringify(value);
-        message += " [old] " + cached_value;
-        diff = (new_value !== cached_value);
+    if (cache.hit) {
+        let cached_this = myStringify(cache._this),
+            cached_value = myStringify(cache.value);
+        message += "\n[old] " + "[" + cached_this + "] " + cached_value;
+        diff = (new_value !== cached_value) || (new_this !== cached_this);
     }
     
     return {
-        hit,
+        hit: cache.hit,
         message,
         diff
     };
@@ -92,7 +88,7 @@ function compare(
 
 // Persistence
 
-const cache_file = process.cwd() + '/jfest.calls',
+const cache_file = process.cwd() + '/calls.jinstatest',
       fs = require('fs');
 
 function warmup () {

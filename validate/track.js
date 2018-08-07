@@ -1,5 +1,6 @@
 const calls = require('./calls'),
-      { myStringify } = require('./utils');
+      { myStringify } = require('./utils'),
+      { deepAssign } = require('./deepassign');
 
 /*****************************/
 /* Tracking of function runs */
@@ -14,17 +15,21 @@ function createTrack (
         _this)
     {
 	return function () {
-	    let args = Array.from(arguments[0]);
+	    let args = Array.from(arguments[0]),
+                callee = {
+                    name: f.name,
+                    // Snapshot of _this before calling method
+                    _this: (_this === null ? null : deepAssign({},_this) ),
+                    args
+                };
 
 	    if ( $options.canBeFaked(f) )
 	    {
-                let {hit, value} = calls.fetch(
-                    f.name,
-                    _this,
-                    args
-                );
-                if (hit)
-		    return value;
+                let fake_call = calls.fetch(callee);
+                if (fake_call.hit) {
+                    deepAssign(_this, fake_call._this);
+		    return fake_call.value;
+                }
 	    }
 
 	    let call = run(
@@ -36,9 +41,9 @@ function createTrack (
 	    if ( f.name )
             {
                 if ( $options.canTestCall() )
-		    test(f.name, _this, args, call, $results);
+		    test(callee, call, $results);
                 if ( $options.canSaveCall() )
-		    save(f.name, _this, args, call);
+		    save(callee, call);
 	    }
             
 	    return call.value;
@@ -54,8 +59,13 @@ function createRunAll (
             .getFunctionCalls(f.name)
             .forEach(
                 ({_this, args}) => {
-	            let call = run(f, _this, args);
-	            test(f.name, _this, args, call, $results);
+                    let callee = {
+                        name: f.name,
+                        _this: (_this === null ? null : deepAssign({},_this) ),
+                        args
+                    },
+	                call = run(f, _this, args);
+	            test(callee, call, $results);
                 }
             );
     };
@@ -67,28 +77,29 @@ function run (
     args)
 {
     let start = process.hrtime(),
-        value = f.apply(
-            _this,
-            args
+        value = f.bind(_this)(
+            ...args
         ),
+        // value = f.apply(
+        //     _this, // mutated
+        //     args
+        // ),
         end = process.hrtime();
     return {
 	value,
+        // Snapshot of _this after calling method (to save from subsequent calls)
+        _this: (_this === null ? null : deepAssign({},_this) ),
 	utime: (end[0] - start[0]) * 1000000 + (end[1] - start[1]) / 1000
     };
 };
 
 function test (
-    f_name,
-    _this,
-    args,
+    callee,
     call,
     results)
 {
     let {hit, message, diff} = calls.compare(
-        f_name,
-        _this,
-        args,
+        callee,
         call
     );
 
@@ -102,21 +113,12 @@ function test (
 };
 
 function save(
-    f_name,
-    _this,
-    args,
+    callee,
     call)
 {
-    Object.assign(call, {
-        name: f_name,
-        _this,
-        args
-    });
     // Store result in cache
     calls.write(
-        f_name,
-        _this,
-        args,
+        callee,
         call
     );
     // Make persistent
