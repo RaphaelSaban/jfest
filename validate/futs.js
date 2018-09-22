@@ -61,9 +61,9 @@ function validateFunctions (js_functions) {
     js_functions
         .filter( ({name}) => name !== "$test" && name !== "$save" )
         .forEach( ({name}) => {
-	    log.out("Validating '"+name+"'");
-	    try {
-		safeEval(
+            log.out("Validating '"+name+"'");
+            try {
+        	safeEval(
                     // Expression to `eval`
                     '$runAll($functions[name])',
                     // context
@@ -73,9 +73,9 @@ function validateFunctions (js_functions) {
                         name
                     }
                 );
-	    }
-	    catch (e) {
-	        log.error("[Regression runtime error] " + e);
+            }
+            catch (e) {
+                log.error("[Regression runtime error] " + e);
             }
         });
 

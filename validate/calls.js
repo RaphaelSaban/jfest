@@ -46,7 +46,8 @@ function write (
     );
 }
 
-function getFunctionCalls (name) {
+function getFunctionCalls (name)
+{
     if (! (name in calls) )
         return [];
 
@@ -88,7 +89,7 @@ function compare (
 
 // Persistence
 
-const cache_file = process.cwd() + '/calls.jinstatest',
+const cache_file = process.cwd() + '/calls.jin',
       fs = require('fs');
 
 function warmup () {

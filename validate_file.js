@@ -43,6 +43,8 @@ function removeShebang(data) {
     // If the first line is a shebang (#!), remove it
     if (data && data.substr(0, 2) === '#!') {
         let endOfLineIndex = data.indexOf( '\n' );
+        if (endOfLineIndex === -1)
+            return "";
         data = data.substr(endOfLineIndex + 1);
     }
     return data;

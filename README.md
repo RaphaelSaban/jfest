@@ -78,7 +78,7 @@ function $save() {
 }
 ```
 
-Note that a file `calls.jinstatest` has just been created in the running directory. Commit that file along with your code, you and your collaborators will use it later to check they do not break your code.
+Note that a file `calls.jin` has just been created in the running directory. Commit that file along with your code, you and your collaborators will use it later to check they do not break your code.
 
 #### Introduce a regression
 

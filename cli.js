@@ -83,5 +83,9 @@ function isDirIgnored (dirname) {
     if (/^\./.exec(dirname))
         return true;
 
+    // Do not track modules that are not part of the project
+    if (dirname === 'node_modules')
+        return true;
+    
     return false;
 };
